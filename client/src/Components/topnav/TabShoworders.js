@@ -1,7 +1,7 @@
 import {useState, useEffect,useContext} from 'react'
-import ShowOrders from './ShowOrders'
+import ShowOrders from '../grid/ShowOrders'
 import axios from 'axios'
-import {UserContext} from '../contextapi'
+import {UserContext} from '../../contextapi'
 
 
 const TabShoworders = () => {
@@ -76,7 +76,7 @@ const TabShoworders = () => {
     </div>
 
 
-     {state.show_logout_btn && <ShowOrders style={ { "height": "100vh" , "width":"100vw"} }  />}
+     {state.show_logout_btn && <ShowOrders />}
     </div>
     )
 }

@@ -1,10 +1,12 @@
 import React,{useEffect,useState,useMemo} from 'react'
-import {useTable} from 'react-table'
-import Crudnav from './crudnav'
-
+import {useTable,useGlobalFilter,useSortBy,usePagination } from 'react-table'
+import Crudnav from '../crudnav/crudnav'
+import  {GlobalFilter} from '../others/GlobalFilter'
 import axios from 'axios'
-import './react-table.css'
 
+import {arrow_up, arrow_down} from '../icons/icons'
+// import {format} from 'date-fns'
+import './react-table.css'
 
 function ShowOrders() {
 
@@ -13,7 +15,10 @@ const GroupedColumns = [
      Header:"Personal Details",
      columns:[
       {Header:'ORDER NUM', accessor:'OrderNo'}, 
-      {Header:'ORDER DATE', accessor:'Date'}, 
+      {Header:'ORDER DATE', accessor:'Date',
+      //  Cell:(value)=>{ return format(new Date(value.date),'dd/mm/yyyy')} 
+    }, 
+
       {Header:'NAME', accessor:'Name'}, 
       {Header:'ADHAR', accessor:'AadharNo'}, 
       {Header:'CONTACT', accessor:'Contact'}, 
@@ -110,138 +115,78 @@ const GroupedColumns = [
   },
 ]  
 
-// const Columns =[{Header:'ORDER NUM', accessor:'OrderNo'}, 
-//                 {Header:'ORDER DATE', accessor:'Date'}, 
-//                 {Header:'NAME', accessor:'Name'}, 
-//                 {Header:'ADHAR', accessor:'AadharNo'}, 
-//                 {Header:'CONTACT', accessor:'Contact'}, 
-//                 {Header:'ADDRESS', accessor:'Address'}, 
-//                 {Header:'TEHSIL', accessor:'Tehsil'}, 
-//                 {Header:'DISTRICT', accessor:'District'}, 
-//                 {Header:'PINCODE', accessor:'PinCode'}, 
-//                 {Header:'STATE', accessor:'State'}, 
-//                 {Header:'WATSAPP', accessor:'Watsapp'}, 
-//                 {Header:'COMPANY', accessor:'CompanyName'},   
-//                 {Header:'ORDER TABLE', accessor:'OrderTable',
-//                 Cell: (cell ) => (                  
-//                   <div class="dropdown">
-//                   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-//                     ORDER 
-//                   </button>
-//                   <div class="dropdown-menu lg" aria-labelledby="dropdownMenuButton">
-//                   <table className="embedded">
-//                     <tr>
-//                       <th>Srlno</th>
-//                       <th>Details</th>
-//                       <th>Quantity</th>
-//                       <th>Rate</th>
-//                       <th>Amount</th>
-//                     </tr>
-                    
-//                     { cell.row.values.OrderTable.map(function(row,index){return <tr>
-//                        <td>{index}</td>
-//                        <td>{row.Order_Details}</td>
-//                        <td>{row.Order_Quantity}</td>
-//                        <td>{row.Order_Rate}</td>
-//                        <td>{row.Order_Amount}</td>                      
-//                        </tr>})}
-//                   </table>
-//                   </div>
-//                 </div>
-//                 )
-
-
-//                 },
-//                 {Header:'BILL AMOUNT', accessor:'BillAmt'},  
-//                 {Header:'TRANSPORT CHARGE', accessor:'TransportChrg'}, 
-//                 {Header:'TOTAL AMOUNT', accessor:'TotalAmt'}, 
-//                 {Header:'ADVANCE PAID', accessor:'Advance'}, 
-//                 {Header:'DUE AMOUNT', accessor:'DueAmt'  }, 
-//                 {Header:'DELIVERY DATE', accessor:'DeliveryDate' },  
-//                 {Header:'DELIVERY PLACE', accessor:'DeliveryPlace'}, 
-//                  {Header:'DEPOSIT TABLE', accessor:'DepositTable',Cell: ({ cell }) => (    
-
-//                   <div class="dropdown">
-//                   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-//                     Deposit
-//                   </button>
-//                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-//                   <table className="embedded">
-//                     <tr>
-//                       <th>Srlno</th>
-//                       <th>Date</th>
-//                       <th>Bank</th>
-//                       <th>UTR Number</th>
-//                       <th>Amount</th>
-//                     </tr>
-
-//                         { cell.row.values.DepositTable.map(function(row,index){return <tr>
-//                        <td>{index}</td>
-//                        <td>{row.Deposit_Date}</td>
-//                        <td>{row.Deposit_Bank}</td>
-//                        <td>{row.Deposit_UTRNo}</td>
-//                        <td>{row.Deposit_Amount}</td>                      
-//                        </tr>})}
-//                   </table>
-//                   </div>
-//                 </div>
-
-
-//                 )  }, 
-//                 {Header:'BANK ACCOUNT', accessor:'Ac'             }, 
-//                 {Header:'ACCOUNT HOLDER', accessor:'AcHolder'     }, 
-//                 {Header:'ACCOUNT NUMBER', accessor:'AcNo'         },  
-//                 {Header:'IFSC CODE', accessor:'IFSC'              },  
-//                 {Header:'DEALER NAME', accessor:'DealerName'      },    
-//                 {Header:'DEALER CONTACT', accessor:'DealerContact'},
-// ]
-
   const [RowData,setRowData] = useState([])
 
-  useEffect(() => {
-      axios.get('http://localhost:4000/order/show')
-      .then((resp) =>{
-          console.log(resp)
-          setRowData(resp.data)
-         })
-      .catch((err)=>{console.log(err)})     
-  }, [RowData])
 
-  
-  
-  // const columns =useMemo( () => Columns,[] ) 
+  const fetch_data=async()=>{
+    try{
+      let ref = await fetch('http://localhost:4000/order/show')
+    ref = await ref.json();
+    console.log(ref);
+    setRowData(ref);
+    }
+    catch(e){
+     console.error(e);
+    } 
+  }
+  useMemo(() => {
+    console.log('hello')
+     fetch_data()   
+  }, [])
+
+
+
   const columns = useMemo(()=> GroupedColumns,[]  )
-  const data = useMemo( () => RowData,[] )
+  // const data = useMemo( () => RowData,[] )
+
+  // const columns = GroupedColumns
+  const data = RowData
 
 
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
+    page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    gotoPage,
+    state,
+    setGlobalFilter, 
     prepareRow,
   } = useTable({
     columns,
     data,
-  })
+  },
+  useGlobalFilter,useSortBy,usePagination)
+  const {pageIndex} = state 
+  const {globalFilter} = state
 
   // Render the UI for your table
+
   return (
     <>
     <Crudnav/>
-    <div>
+
+    <div style={{ "background-color": "wheat"}}>
     <table {...getTableProps()}>
       <thead>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map(column => (
-              <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+              <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                {column.render('Header')}
+                  {column.isSorted ? (column.isSortedDesc ? ' v':' ^'):''}
+                </th>
             ))}
           </tr>
         ))}
       </thead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
+        {page.map((row, i) => {
           prepareRow(row)
           return (
             <tr {...row.getRowProps()}>
@@ -253,6 +198,39 @@ const GroupedColumns = [
         })}
       </tbody>
     </table>  
+
+
+
+    <div className="row">
+    <div className="col" style={{"paddingTop":"7px"}}>
+          <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter}/>
+    </div> 
+      <div className="col" style={{"paddingTop":"7px"}}>
+        <span>
+         {' '}Page{' '}
+         <strong>{' '}
+           {pageIndex + 1} of {pageOptions.length} 
+         </strong>
+        </span>
+        <span>
+        {' '}|{' '}Go to Page :
+          <input type="number" defaultValue={pageIndex+1}
+          onChange={e=>{ 
+            const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0
+            gotoPage(pageNumber)
+          }}
+            style={{width:"50px"}}/> 
+        </span>
+        </div>
+        <div className="col" style={{"paddingTop":"3px"}}>
+        <button className="btn btn-primary" onClick={() => previousPage()} disabled={!canPreviousPage}>Previous</button>
+        </div>
+        <div className="col">
+        </div> 
+        <div className="col" style={{"paddingTop":"3px"}}>
+        <button className="btn btn-primary" onClick={() => nextPage()} disabled={!canNextPage}>Next</button>
+        </div>
+      </div>
     </div>
     </>
   )

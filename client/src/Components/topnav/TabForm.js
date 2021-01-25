@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import FormDetails from './Form'
+import FormDetails from '../form/formik/FormikForm'
 
  class TabForm extends Component {
     render() {

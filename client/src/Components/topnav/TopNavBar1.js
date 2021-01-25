@@ -1,9 +1,9 @@
 import React, {useContext } from 'react'
 import {Link} from 'react-router-dom'
 
-import {UserContext} from '../contextapi'
+import {UserContext} from '../../contextapi'
 
-import './Topnavbar.css'
+import './Topnavbar1.css'
 
 
 function TopNavBar()
@@ -15,7 +15,7 @@ function TopNavBar()
     }
         return (
              <div>
-               <div className="topnav">
+               <div className="topnav" style={{"width":"100vw"}}>
                  <nav className="navbar navbar-expand-sm bg-dark sticky-top border rounded-sm">
                         <ul className="navbar-nav ml-auto">
                         <li className="nav-item">
